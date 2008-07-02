@@ -1,0 +1,3 @@
+* support resize_to
+* support non-image attachments so it's a generic attachment_fu backend
+* avoid changing the filename attribute in the database - makes migration painful and irreversible
