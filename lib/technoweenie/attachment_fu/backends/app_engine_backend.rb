@@ -54,7 +54,7 @@ module Technoweenie # :nodoc:
 
               encoded_data = "--#{boundary}\r\n#{chunk}--#{boundary}--\r\n"
               response = Net::HTTP.new(AppEngineBackend.app_engine_domain, 80).start do |http|
-                http.request_post('/photos', encoded_data, "Content-type" => "multipart/form-data; boundary=" + boundary)
+                http.request_post('/attachments', encoded_data, "Content-type" => "multipart/form-data; boundary=" + boundary)
               end
               location = response['Location'].split('/')
               location.slice!(0,3)

@@ -12,15 +12,14 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
-
-
-class Photo(db.Model):
+class Attachment(db.Model):
   filename = db.StringProperty(str)
-  image_data = db.BlobProperty()
+  uploaded_data = db.BlobProperty()
   content_type = db.StringProperty()
   height = db.IntegerProperty()
   width = db.IntegerProperty()
-  
+  size = db.IntegerProperty()
+
   # FROM http://www.google.com/codesearch?hl=en&q=+getImageInfo+show:RjgT7H1iBVM:V39CptbrGJ8:XcXNaKeZR3k&sa=N&cd=2&ct=rc&cs_p=http://www.zope.org/Products/Zope3/3.0.0final/ZopeX3-3.0.0.tgz&cs_f=ZopeX3-3.0.0/Dependencies/zope.app.file-ZopeX3-3.0.0/zope.app.file/image.py#l88
   def extract_image_attributes(self,data):
     data = str(data)
@@ -78,18 +77,20 @@ class Photo(db.Model):
         except ValueError:
             pass
 
-    return height,width,content_type
+    return height,width
 
-  def update_image_data(self, data):
-    self.height, self.width, self.content_type = self.extract_image_attributes(data)
-    if not self.content_type:
-      #if we can't determine the image attributes in the original format try converting it to a PNG with a no-op rotate
-      image = images.Image(data)
-      image.rotate(0)
-      data = image.execute_transforms(output_encoding=images.PNG)
-      self.height, self.width, self.content_type = self.extract_image_attributes(data)
+  def update_uploaded_data(self, data, content_type):
+    if content_type.startswith('image'):
+      self.height, self.width = self.extract_image_attributes(data)
+      if not self.height:
+        #if we can't determine the image attributes in the original format try converting it to a PNG with a no-op rotate
+        image = images.Image(data)
+        image.rotate(0)
+        self.height, self.width = self.extract_image_attributes(image.execute_transforms(output_encoding=images.PNG))
 
-    self.image_data = data
+    self.content_type = content_type
+    self.uploaded_data = data
+    self.size = len(data)
   
   # I'm attempting to replicate the resize format from http://www.imagemagick.org/Usage/resize/#resize
   # at least enough to be usable for avatar or photo gallery thumbnails
@@ -105,7 +106,7 @@ class Photo(db.Model):
 
     width,height = format.split('x')
 
-    img = images.Image(self.image_data)
+    img = images.Image(self.uploaded_data)
     if not preserve_aspect_ratio:
       requested_aspect = float(height)/float(width)
       aspect = float(self.height)/float(self.width)
@@ -132,18 +133,18 @@ class Photo(db.Model):
     img.rotate(0) #no-op so that we don't break if we haven't done any transforms
     return img.execute_transforms(output_encoding), "image/png"
 
-class UploadPhotoPage(webapp.RequestHandler):
+class UploadAttachmentPage(webapp.RequestHandler):
   def get(self):
     path = os.path.join(os.path.dirname(__file__), 'new.html')
     self.response.out.write(template.render(path, {}))
 
-class PhotoPage(webapp.RequestHandler):
+class AttachmentPage(webapp.RequestHandler):
   def get(self):
     id = self.request.path.split('/')[-1]
-    photo = Photo.get(db.Key(id))
+    attachment = Attachment.get(db.Key(id))
     
-    if not photo:
-      # Either "id" wasn't provided, or there was no image with that ID
+    if not attachment:
+      # Either "id" wasn't provided, or there was no attachment with that ID
       # in the datastore.
       self.error(404)
       return
@@ -153,37 +154,35 @@ class PhotoPage(webapp.RequestHandler):
     format = self.request.get("resize")
     if format:
       memcache_client = memcache.Client()
-      cache_key = "photo-" + str(photo.key()) + "-" + format
+      cache_key = "attachment-" + str(attachment.key()) + "-" + format
       result = memcache_client.get(cache_key)
       if not result:
-        data, content_type = photo.resize(format)
+        data, content_type = attachment.resize(format)
         memcache_client.set(cache_key, [data, content_type])
       else:
         data, content_type = result[0], result[1]
       self.response.headers['Content-Type'] = content_type
       self.response.out.write(data)
     else:
-      self.response.headers['Content-Type'] = str(photo.content_type)
-      self.response.out.write(photo.image_data)
+      self.response.headers['Content-Type'] = str(attachment.content_type)
+      self.response.out.write(attachment.uploaded_data)
 
   def post(self):
-    photo = Photo()
+    attachment = Attachment()
 
     form = cgi.FieldStorage()
-    image_data = form['uploaded_data']
-    if image_data.file:
-      photo.filename = image_data.filename
+    uploaded_data = form['uploaded_data']
+    attachment.filename = uploaded_data.filename
 
-    photo.update_image_data(form.getvalue('uploaded_data'))
-    photo.put()
+    attachment.update_uploaded_data(uploaded_data.value, uploaded_data.type)
+    attachment.put()
 
-    self.redirect('/photos/' + str(photo.key()))
-
+    self.redirect('/attachments/' + str(attachment.key()))
   
 def main():
   application = webapp.WSGIApplication(
-    [('/photos/new', UploadPhotoPage),
-      ('/photos.*', PhotoPage)],
+    [('/attachments/new', UploadAttachmentPage),
+      ('/attachments.*', AttachmentPage)],
     debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 

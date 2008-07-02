@@ -1,3 +1,6 @@
-* support resize_to
 * support non-image attachments so it's a generic attachment_fu backend
+* support resize_to
 * avoid changing the filename attribute in the database - makes migration painful and irreversible
+* store attachment size in the db
+* preserve jpg format if resizing a jpg
+* redirect unrecognized requests to github page

@@ -4,5 +4,5 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /photos.*
-  script: photo.py
+- url: /attachments.*
+  script: attachment.py
