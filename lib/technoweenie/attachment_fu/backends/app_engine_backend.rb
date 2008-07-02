@@ -3,7 +3,7 @@ module Technoweenie # :nodoc:
   module AttachmentFu # :nodoc:
     module Backends
       # store in Google App Engine
-      module GoogleAppEngineBackend
+      module AppEngineBackend
         mattr_accessor :app_engine_domain
         @@app_engine_domain = "attachment-fu-gae.appspot.com"
         
@@ -12,7 +12,7 @@ module Technoweenie # :nodoc:
         end
         def public_filename(thumbnail = nil)
           query = thumbnail.nil? ? "" : "?resize=#{attachment_options[:thumbnails][thumbnail]}"
-          "http://#{GoogleAppEngineBackend.app_engine_domain}/#{filename}#{query}"
+          "http://#{AppEngineBackend.app_engine_domain}/#{filename}#{query}"
         end
 
         def create_temp_file
@@ -21,7 +21,7 @@ module Technoweenie # :nodoc:
 
         # Gets the current data from the database
         def current_data
-          Net::HTTP.new(GoogleAppEngineBackend.app_engine_domain, 80).start do |http|
+          Net::HTTP.new(AppEngineBackend.app_engine_domain, 80).start do |http|
             http.get(filename).response_body
           end
         end
@@ -53,7 +53,7 @@ module Technoweenie # :nodoc:
               boundary = "349832898984244898448024464570528145"
 
               encoded_data = "--#{boundary}\r\n#{chunk}--#{boundary}--\r\n"
-              response = Net::HTTP.new(GoogleAppEngineBackend.app_engine_domain, 80).start do |http|
+              response = Net::HTTP.new(AppEngineBackend.app_engine_domain, 80).start do |http|
                 http.request_post('/photos', encoded_data, "Content-type" => "multipart/form-data; boundary=" + boundary)
               end
               location = response['Location'].split('/')
