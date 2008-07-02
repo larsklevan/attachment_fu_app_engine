@@ -1,0 +1,28 @@
+AttachmentFuAppEngine
+=====================
+
+Extension for AttachmentFu (http://github.com/technoweenie/attachment_fu) which uses the Google App Engine for storage and image resizing.  Removes the need to install ImageMagick and allows you to add or change thumbnail sizes without migrating previous data.
+
+The Google App Engine backend code is included so you can run it in your own App Engine instance.
+
+Example
+=======
+
+class Photo < ActiveRecord::Base
+  has_attachment :storage => :app_engine, :thumbnails => {:small_square => "45x45!"}
+end
+
+AttachmentFuAppEngine attempts to reproduce the resize format from ImageMagick.
+
+* "100x100"  - scale the image to fit within a 100x100 box (the larger dimension will be 100, such as 100x75), preserving the aspect ratio.  Will scale up small images.
+* "100x100!" - scale the image to be exactly 100x100 by scaling proportionately and cropping off the edges.  Will not distort the image but may hide part of it.
+* "100x100>" - scale the image to be at most 100x100 - smaller images will not be enlarged.
+
+Limitations
+===========
+
+* Google App Engine is in early release, so if you go past your daily storage/bandwidth/CPU limit you are out of luck.
+* Google App Engine does not support HTTPS.
+* I haven't had much luck uploading large files (larger than 2 MB or so) to Google App Engine.  This plugin is mainly intended for photos so hopefully that restriction won't be a major issue.
+
+Copyright (c) 2008 Lars Klevan, released under the MIT license
