@@ -34,7 +34,7 @@ module Technoweenie # :nodoc:
         # The pseudo hierarchy containing the file relative to the bucket name
         # Example: <tt>:table_name/:id</tt>
         def base_path
-          [attachment_options[:path_prefix].gsub('public/', ''), id.to_s].compact.join('/')
+          ['attachments', attachment_options[:path_prefix].gsub('public/', ''), id.to_s].compact.join('/')
         end
 
         # The full path to the file relative to the bucket name
