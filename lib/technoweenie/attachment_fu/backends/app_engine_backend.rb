@@ -21,8 +21,7 @@ module Technoweenie # :nodoc:
 
         # Gets the current data from the database
         def current_data
-          uri = URI.parse(AppEngineBackend.domain)
-          Net::HTTP.new(uri.host, uri.port).start do |http|
+          with_app_engine_connection do |http|
             http.get(filename).response_body
           end
         end
@@ -31,11 +30,30 @@ module Technoweenie # :nodoc:
         def process_attachment
           @saved_attachment = true
         end
+        
+        # The pseudo hierarchy containing the file relative to the bucket name
+        # Example: <tt>:table_name/:id</tt>
+        def base_path
+          File.join(attachment_options[:path_prefix], id.to_s)
+        end
 
+        # The full path to the file relative to the bucket name
+        # Example: <tt>:table_name/:id/:filename</tt>
+        def full_filename
+          File.join(base_path, filename)
+        end
+        
         protected
           # Destroys the file.  Called in the after_destroy callback
           def destroy_file
 
+          end
+          
+          def with_app_engine_connection
+            uri = URI.parse(AppEngineBackend.domain)
+            Net::HTTP.new(uri.host, uri.port).start do |http|
+              yield http
+            end
           end
 
           def save_to_storage
@@ -45,24 +63,31 @@ module Technoweenie # :nodoc:
               filename = self.filename
               mime_type = content_type
               content = temp_data
-              chunk = "Content-Disposition: form-data; name=\"#{CGI::escape(param)}\"; filename=\"#{filename}\"\r\n" +
+              chunks = []
+              chunks << "Content-Disposition: form-data; name=\"#{CGI::escape(param)}\"; filename=\"#{filename}\"\r\n" +
                      "Content-Transfer-Encoding: binary\r\n" +
                      "Content-Type: #{mime_type}\r\n" + 
                      "\r\n" + 
                      "#{content}\r\n"
 
-              boundary = "349832898984244898448024464570528145"
+              chunks << "Content-Disposition: form-data; name=\"path\"\r\n" + 
+                  "\r\n" + 
+                  full_filename
 
-              encoded_data = "--#{boundary}\r\n#{chunk}--#{boundary}--\r\n"
-              uri = URI.parse(AppEngineBackend.domain)
-              response = Net::HTTP.new(uri.host, uri.port).start do |http|
-                http.request_post('/attachments', encoded_data, "Content-type" => "multipart/form-data; boundary=" + boundary)
+              boundary = "349832898984244898448024464570528145"
+              post_body = StringIO.new
+              post_body << "--#{boundary}\r\n"
+              chunks.each do |chunk|
+                post_body << "--#{boundary}\r\n"
+                post_body << chunk
+              end
+              post_body << "--#{boundary}--\r\n"
+
+
+              response = with_app_engine_connection do |http|
+                http.request_post('/attachments', post_body, "Content-type" => "multipart/form-data; boundary=" + boundary)
               end
               raise response.body unless response.is_a? Net::HTTPRedirection
-              location = response['Location'].split('/')
-              location.slice!(0,3)
-
-              self.class.update_all("filename = '#{location.join('/')}'", :id => id)
             end
             true
           end
