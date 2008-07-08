@@ -21,7 +21,8 @@ module Technoweenie # :nodoc:
 
         # Gets the current data from the database
         def current_data
-          Net::HTTP.new(AppEngineBackend.domain, 80).start do |http|
+          uri = URI.parse(AppEngineBackend.domain)
+          Net::HTTP.new(uri.host, uri.port).start do |http|
             http.get(filename).response_body
           end
         end
