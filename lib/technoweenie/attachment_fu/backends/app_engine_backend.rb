@@ -5,7 +5,7 @@ module Technoweenie # :nodoc:
       # store in Google App Engine
       module AppEngineBackend
         mattr_accessor :domain
-        @@domain = "attachment-fu-gae.appspot.com"
+        @@domain = "http://attachment-fu-gae.appspot.com"
         
         def self.included(base) #:nodoc:
           
@@ -53,7 +53,8 @@ module Technoweenie # :nodoc:
               boundary = "349832898984244898448024464570528145"
 
               encoded_data = "--#{boundary}\r\n#{chunk}--#{boundary}--\r\n"
-              response = Net::HTTP.new(AppEngineBackend.domain, 80).start do |http|
+              uri = URI.parse(AppEngineBackend.domain)
+              response = Net::HTTP.new(uri.host, uri.port).start do |http|
                 http.request_post('/attachments', encoded_data, "Content-type" => "multipart/form-data; boundary=" + boundary)
               end
               location = response['Location'].split('/')
