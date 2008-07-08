@@ -58,7 +58,7 @@ module Technoweenie # :nodoc:
               response = Net::HTTP.new(uri.host, uri.port).start do |http|
                 http.request_post('/attachments', encoded_data, "Content-type" => "multipart/form-data; boundary=" + boundary)
               end
-              raise response.response_text unless response.status == 302
+              raise response.response_text unless response.is_a? Net::HTTPRedirection
               location = response['Location'].split('/')
               location.slice!(0,3)
 
