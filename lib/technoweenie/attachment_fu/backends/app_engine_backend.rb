@@ -12,7 +12,7 @@ module Technoweenie # :nodoc:
         end
         def public_filename(thumbnail = nil)
           query = thumbnail.nil? ? "" : "?resize=#{attachment_options[:thumbnails][thumbnail]}"
-          "http://#{AppEngineBackend.domain}/#{filename}#{query}"
+          "#{AppEngineBackend.domain}/#{filename}#{query}"
         end
 
         def create_temp_file

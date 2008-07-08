@@ -145,8 +145,8 @@ class AttachmentPage(webapp.RequestHandler):
     id = self.request.path.split('/')[-1]
     attachment = Attachment.get(db.Key(id))
     
-    if not attchment:
-      attachment = db.Query(Attachment).filter("path =", id).get()
+    # if not attchment:
+    #   attachment = db.Query(Attachment).filter("path =", id).get()
 
     if not attachment:
       # Either "id" wasn't provided, or there was no attachment with that ID
@@ -178,7 +178,7 @@ class AttachmentPage(webapp.RequestHandler):
     form = cgi.FieldStorage()
     uploaded_data = form['uploaded_data']
     attachment.filename = uploaded_data.filename
-    attachment.path = form['path']
+    attachment.path = form.getvalue('path')
 
     attachment.update_uploaded_data(uploaded_data.value, uploaded_data.type)
     attachment.put()
