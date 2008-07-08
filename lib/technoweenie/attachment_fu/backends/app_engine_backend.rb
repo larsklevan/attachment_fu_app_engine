@@ -34,13 +34,13 @@ module Technoweenie # :nodoc:
         # The pseudo hierarchy containing the file relative to the bucket name
         # Example: <tt>:table_name/:id</tt>
         def base_path
-          File.join(attachment_options[:path_prefix], id.to_s)
+          [attachment_options[:path_prefix], table_name, id.to_s].flatten.join('/')
         end
 
         # The full path to the file relative to the bucket name
         # Example: <tt>:table_name/:id/:filename</tt>
         def full_filename
-          File.join(base_path, filename)
+          [base_path, filename].join('/')
         end
         
         protected
@@ -82,7 +82,6 @@ module Technoweenie # :nodoc:
                 post_body << chunk
               end
               post_body << "--#{boundary}--\r\n"
-
 
               response = with_app_engine_connection do |http|
                 http.request_post('/attachments', post_body, "Content-type" => "multipart/form-data; boundary=" + boundary)
