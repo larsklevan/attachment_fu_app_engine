@@ -43,6 +43,9 @@ module Technoweenie # :nodoc:
           [base_path, filename].join('/')
         end
         
+        def create_or_update_thumbnail(*args)
+          #ignore
+        end
         protected
           # Destroys the file.  Called in the after_destroy callback
           def destroy_file

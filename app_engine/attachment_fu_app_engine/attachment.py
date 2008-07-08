@@ -142,11 +142,15 @@ class UploadAttachmentPage(webapp.RequestHandler):
 
 class AttachmentPage(webapp.RequestHandler):
   def get(self):
-    id = self.request.path.split('/')[-1]
-    attachment = Attachment.get(db.Key(id))
-    
-    # if not attchment:
-    #   attachment = db.Query(Attachment).filter("path =", id).get()
+    attachment = None
+    try:
+      id = self.request.path.split('/')[-1]
+      attachment = Attachment.get(db.Key(id))
+    except:
+      None
+
+    if not attachment:
+      attachment = db.Query(Attachment).filter("path =", self.request.path).get()
 
     if not attachment:
       # Either "id" wasn't provided, or there was no attachment with that ID
