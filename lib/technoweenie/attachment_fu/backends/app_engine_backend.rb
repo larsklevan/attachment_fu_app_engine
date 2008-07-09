@@ -11,7 +11,13 @@ module Technoweenie # :nodoc:
           
         end
         def public_filename(thumbnail = nil)
-          query = thumbnail.nil? ? "" : "?resize=#{attachment_options[:thumbnails][thumbnail]}"
+          query = if thumbnail && attachment_options[:thumbnails] && attachment_options[:thumbnails][thumbnail]
+            "?resize=#{attachment_options[:thumbnails][thumbnail]}"
+          elsif attachment_options[:resize]
+            "?resize=#{attachment_options[:resize]}"
+          else
+            ''
+          end
           "#{AppEngineBackend.domain}/#{full_filename}#{query}"
         end
 

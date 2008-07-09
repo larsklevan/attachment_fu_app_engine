@@ -177,9 +177,9 @@ class AttachmentPage(webapp.RequestHandler):
       self.response.out.write(attachment.uploaded_data)
 
   def post(self):
-    if db.Query(Attachment).filter("path =", self.request.path[1::]):
+    if db.Query(Attachment).filter("path =", self.request.path[1::]).get():
       # should be transactional
-      self.error(201)
+      self.error(409)
       return
 
     attachment = Attachment()
