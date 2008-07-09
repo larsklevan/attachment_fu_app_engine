@@ -96,7 +96,7 @@ class Attachment(db.Model):
   
   # I'm attempting to replicate the resize format from http://www.imagemagick.org/Usage/resize/#resize
   # at least enough to be usable for avatar or photo gallery thumbnails
-  def resize(self, format, output_encoding=images.PNG):
+  def resize(self, format):
     preserve_aspect_ratio = True
     allow_scale_up = True
     if format.endswith("!"):
@@ -132,8 +132,12 @@ class Attachment(db.Model):
     if allow_scale_up or width < self.width or height < self.height:
       img.resize(width=int(width), height=int(height))
 
+    output_encoding, content_type = images.PNG, 'image/png'
+    if self.content_type == 'image/jpeg' or self.content_type == 'image/jpg':
+      output_encoding, content_type = images.JPEG, 'image/jpeg'
+
     img.rotate(0) #no-op so that we don't break if we haven't done any transforms
-    return img.execute_transforms(output_encoding), "image/png"
+    return img.execute_transforms(output_encoding), content_type
 
 class UploadAttachmentPage(webapp.RequestHandler):
   def get(self):

@@ -1,4 +1,3 @@
-* preserve jpg format if resizing a jpg
 * redirect unrecognized requests to github page
 * rake task for migrating from S3
 
