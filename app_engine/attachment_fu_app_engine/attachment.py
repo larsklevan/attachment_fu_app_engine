@@ -150,7 +150,7 @@ class AttachmentPage(webapp.RequestHandler):
       None
 
     if not attachment:
-      attachment = db.Query(Attachment).filter("path =", self.request.path).get()
+      attachment = db.Query(Attachment).filter("path =", self.request.path[1::]).get()
 
     if not attachment:
       # Either "id" wasn't provided, or there was no attachment with that ID
@@ -177,6 +177,11 @@ class AttachmentPage(webapp.RequestHandler):
       self.response.out.write(attachment.uploaded_data)
 
   def post(self):
+    if db.Query(Attachment).filter("path =", self.request.path[1::]):
+      # should be transactional
+      self.error(201)
+      return
+
     attachment = Attachment()
 
     form = cgi.FieldStorage()

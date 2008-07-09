@@ -1,5 +1,6 @@
 * support resize_to
-* avoid changing the filename attribute in the database - makes migration painful and irreversible
 * preserve jpg format if resizing a jpg
 * redirect unrecognized requests to github page
 * rake task for migrating from S3
+
+* add a unique app prefix to avoid collisions

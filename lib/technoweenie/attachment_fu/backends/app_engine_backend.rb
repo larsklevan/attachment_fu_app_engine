@@ -69,16 +69,13 @@ module Technoweenie # :nodoc:
               chunks = []
               chunks << "Content-Disposition: form-data; name=\"#{CGI::escape(param)}\"; filename=\"#{filename}\"\r\n" +
                      "Content-Transfer-Encoding: binary\r\n" +
-                     "Content-Type: #{mime_type}\r\n" + 
-                     "\r\n" + 
+                     "Content-Type: #{mime_type}\r\n\r\n" +
                      "#{content}\r\n"
 
-              chunks << "Content-Disposition: form-data; name=\"path\"\r\n" + 
-                  "\r\n" + 
-                  full_filename
+              chunks << "Content-Disposition: form-data; name=\"path\"\r\n\r\n#{full_filename}\r\n"
 
               boundary = "349832898984244898448024464570528145"
-              post_body = StringIO.new
+              post_body = ""
               post_body << "--#{boundary}\r\n"
               chunks.each do |chunk|
                 post_body << "--#{boundary}\r\n"
