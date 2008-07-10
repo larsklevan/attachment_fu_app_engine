@@ -196,11 +196,17 @@ class AttachmentPage(webapp.RequestHandler):
     attachment.put()
 
     self.redirect('/attachments/' + str(attachment.key()))
-  
+
+
+class RedirectPage(webapp.RequestHandler):
+  def get(self):
+    self.redirect('/attachments/new')
+
 def main():
   application = webapp.WSGIApplication(
     [('/attachments/new', UploadAttachmentPage),
-      ('/attachments.*', AttachmentPage)],
+      ('/attachments.*', AttachmentPage),
+      ('/.*', RedirectPage)],
     debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 

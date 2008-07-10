@@ -4,5 +4,5 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /attachments.*
+- url: /.*
   script: attachment.py
