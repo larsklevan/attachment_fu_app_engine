@@ -181,17 +181,16 @@ class AttachmentPage(webapp.RequestHandler):
       self.response.out.write(attachment.uploaded_data)
 
   def post(self):
-    if db.Query(Attachment).filter("path =", self.request.path[1::]).get():
-      # should be transactional
-      self.error(409)
-      return
-
-    attachment = Attachment()
-
     form = cgi.FieldStorage()
+    
+    path = form.getvalue('path')
+    attachment = db.Query(Attachment).filter("path =", path).get()
+    if not attachment:
+      attachment = Attachment()
+    attachment.path = path
+    
     uploaded_data = form['uploaded_data']
     attachment.filename = uploaded_data.filename
-    attachment.path = form.getvalue('path')
 
     attachment.update_uploaded_data(uploaded_data.value, uploaded_data.type)
     attachment.put()
