@@ -129,7 +129,7 @@ class Attachment(db.Model):
       # presumably rounding errors - the 0-1 scale for cropping is weird...
       img.crop(left_x=left_x,top_y=top_y,right_x=right_x,bottom_y=bottom_y)
 
-    if allow_scale_up or width < self.width or height < self.height:
+    if allow_scale_up or int(width) < self.width or int(height) < self.height:
       img.resize(width=int(width), height=int(height))
 
     output_encoding, content_type = images.PNG, 'image/png'
