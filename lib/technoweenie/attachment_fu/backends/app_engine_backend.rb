@@ -4,8 +4,13 @@ module Technoweenie # :nodoc:
     module Backends
       # store in Google App Engine
       module AppEngineBackend
-        mattr_accessor :domain
-        @@domain = "http://attachment-fu-gae.appspot.com"
+        mattr_accessor :base_url, :storage_prefix
+        @@base_url = "http://attachment-fu-gae.appspot.com"
+        @@storage_prefix = ""
+        
+        def self.storage_base_url
+          base_url + (storage_prefix.blank? ? '' : '/' + storage_prefix)
+        end
         
         def self.included(base) #:nodoc:
           
@@ -18,7 +23,7 @@ module Technoweenie # :nodoc:
           else
             ''
           end
-          "#{AppEngineBackend.domain}/#{full_filename}#{query}"
+          "#{AppEngineBackend.storage_base_url}/#{full_filename}#{query}"
         end
 
         def create_temp_file
@@ -59,7 +64,7 @@ module Technoweenie # :nodoc:
           end
           
           def with_app_engine_connection
-            uri = URI.parse(AppEngineBackend.domain)
+            uri = URI.parse(AppEngineBackend.storage_base_url)
             Net::HTTP.new(uri.host, uri.port).start do |http|
               yield http
             end
@@ -78,7 +83,7 @@ module Technoweenie # :nodoc:
                      "Content-Type: #{mime_type}\r\n\r\n" +
                      "#{content}\r\n"
 
-              chunks << "Content-Disposition: form-data; name=\"path\"\r\n\r\n#{full_filename}\r\n"
+              chunks << "Content-Disposition: form-data; name=\"path\"\r\n\r\n#{AppEngineBackend.storage_base_url + full_filename}\r\n"
 
               boundary = "349832898984244898448024464570528145"
               post_body = ""
