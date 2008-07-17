@@ -1,4 +1,6 @@
 require 'net/http'
+require 'multipart_post'
+
 module Technoweenie # :nodoc:
   module AttachmentFu # :nodoc:
     module Backends
@@ -37,7 +39,7 @@ module Technoweenie # :nodoc:
         def process_attachment
           @saved_attachment = true
         end
-        
+
         # The pseudo hierarchy containing the file relative to the bucket name
         # Example: <tt>:table_name/:id</tt>
         def base_path
@@ -54,11 +56,10 @@ module Technoweenie # :nodoc:
           #ignore
         end
         protected
-          # Destroys the file.  Called in the after_destroy callback
           def destroy_file
-
+            #ignore
           end
-          
+
           def with_app_engine_connection
             uri = URI.parse(AppEngineBackend.base_url)
             Net::HTTP.new(uri.host, uri.port).start do |http|
@@ -68,30 +69,11 @@ module Technoweenie # :nodoc:
 
           def save_to_storage
             if save_attachment?
-              # see http://www.realityforge.org/articles/2006/03/02/upload-a-file-via-post-with-net-http for file upload with http
-              param = 'uploaded_data'
-              filename = self.filename
-              mime_type = content_type
-              content = temp_data
-              chunks = []
-              chunks << "Content-Disposition: form-data; name=\"#{CGI::escape(param)}\"; filename=\"#{filename}\"\r\n" +
-                     "Content-Transfer-Encoding: binary\r\n" +
-                     "Content-Type: #{mime_type}\r\n\r\n" +
-                     "#{content}\r\n"
-
-              chunks << "Content-Disposition: form-data; name=\"path\"\r\n\r\n#{full_filename}\r\n"
-
-              boundary = "349832898984244898448024464570528145"
-              post_body = ""
-              post_body << "--#{boundary}\r\n"
-              chunks.each do |chunk|
-                post_body << "--#{boundary}\r\n"
-                post_body << chunk
-              end
-              post_body << "--#{boundary}--\r\n"
-
               response = with_app_engine_connection do |http|
-                http.request_post('/attachments', post_body, "Content-type" => "multipart/form-data; boundary=" + boundary)
+                MultipartPost.post(http, [
+                  {:name => 'uploaded_data', :value => temp_data, :mime_type => content_type, :filename => filename},
+                  {:name => 'path', :value => full_filename}
+                ])
               end
               raise response.body unless response.is_a? Net::HTTPRedirection
             end
