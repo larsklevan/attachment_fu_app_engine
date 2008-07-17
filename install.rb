@@ -1,3 +1,5 @@
+require 'erb'
+
 initializer = File.dirname(__FILE__) + '/../../../config/initializers/app_engine_backend.rb'
 
 unless File.exist? initializer

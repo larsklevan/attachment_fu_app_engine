@@ -2,4 +2,4 @@
 Technoweenie::AttachmentFu::Backends::AppEngineBackend.base_url = "http://attachment-fu-gae.appspot.com"
 
 # storage prefix prevents collission between multiple apps using the same app engine for storage
-Technoweenie::AttachmentFu::Backends::AppEngineBackend.storage_prefix = "<%= require 'base64'; Base64.encode64(rand(10e15).to_s).strip %>"
+Technoweenie::AttachmentFu::Backends::AppEngineBackend.storage_prefix = "<%= rand(10e12) %>"
