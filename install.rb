@@ -5,4 +5,4 @@
 #  File.open(initializer, 'w') { |f| f << ERB.new(initializer_template).result }
 #end
 
-#puts IO.read(File.join(File.dirname(__FILE__), 'README'))
+puts IO.read(File.join(File.dirname(__FILE__), 'README'))
