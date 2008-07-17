@@ -1,6 +1,6 @@
 class MultipartPost
   # see http://www.realityforge.org/articles/2006/03/02/upload-a-file-via-post-with-net-http for file upload with http
-  def self.post(http_connection, params=[])
+  def self.post(uri, params=[])
     chunks = []    
     params.each do |param|
       param[:name]
@@ -21,7 +21,10 @@ class MultipartPost
       post_body << chunk
     end
     post_body << "--#{boundary}--\r\n"
-
-    http_connection.request_post('/attachments', post_body, "Content-type" => "multipart/form-data; boundary=" + boundary)
+    
+    uri = URI.parse(uri)
+    Net::HTTP.new(uri.host, uri.port).start do |http|
+      http.request_post(uri.path, post_body, "Content-type" => "multipart/form-data; boundary=" + boundary)
+    end
   end
 end
