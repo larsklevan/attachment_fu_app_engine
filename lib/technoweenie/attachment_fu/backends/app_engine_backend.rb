@@ -11,8 +11,12 @@ module Technoweenie # :nodoc:
         @@storage_prefix = nil
 
         def public_filename(thumbnail = nil)
-          query = if thumbnail && attachment_options[:thumbnails] && attachment_options[:thumbnails][thumbnail]
-            "?resize=#{attachment_options[:thumbnails][thumbnail]}"
+          thumbnails = HashWithIndifferentAccess.new(attachment_options[:thumbnails])
+
+          query = if thumbnail && thumbnails[thumbnail]
+            "?resize=#{thumbnails[thumbnail]}"
+          elsif thumbnail.is_a?(String)
+            "?resize=#{thumbnail}"
           elsif attachment_options[:resize]
             "?resize=#{attachment_options[:resize]}"
           else
