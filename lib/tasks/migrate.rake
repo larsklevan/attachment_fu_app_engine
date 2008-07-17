@@ -6,7 +6,7 @@ task :migrate_s3_to_app_engine => :environment do
 
   clazz = Image
 
-  raise 'You should set the :storage option to :s3 when you run this migration' unless clazz.attachment_options[:storage] == 's3'
+  raise 'You should set the :storage option to :s3 when you run this migration' unless clazz.attachment_options[:storage].to_s == 's3'
 
   app_engine_config = Technoweenie::AttachmentFu::Backends::AppEngineBackend
 
@@ -15,11 +15,11 @@ task :migrate_s3_to_app_engine => :environment do
 
     temp_data = open(o.public_filename).read
   
-    full_filename = ['attachments', app_engine_config.storage_prefix, clazz.attachment_options[:path_prefix], o.filename].compact.join('/')
+    full_filename = ['attachments', app_engine_config.storage_prefix, clazz.attachment_options[:path_prefix], o.id, o.filename].compact.join('/')
   
     param = 'uploaded_data'
     filename = o.filename
-    mime_type = content_type
+    mime_type = o.content_type
     content = temp_data
     chunks = []
     chunks << "Content-Disposition: form-data; name=\"#{CGI::escape(param)}\"; filename=\"#{filename}\"\r\n" +
@@ -45,23 +45,3 @@ task :migrate_s3_to_app_engine => :environment do
     raise response.body unless response.is_a? Net::HTTPRedirection
   end
 end
-
-#clazz.attachment_options[:storage] = :s3
-# 
-# require 'aws/s3'
-# include AWS::S3
-# 
-# s3_config_path = clazz.attachment_options[:s3_config_path] || (RAILS_ROOT + '/config/amazon_s3.yml')
-# s3_config = YAML.load(ERB.new(File.read(s3_config_path)).result)[RAILS_ENV].symbolize_keys
-# 
-# bucket_name = s3_config[:bucket_name]
-# s3_config[:persistent] ||= false
-# s3_config[:access_key_id] ||= ENV['AMAZON_ACCESS_KEY_ID']
-# s3_config[:secret_access_key] ||= ENV['AMAZON_SECRET_ACCESS_KEY']
-# 
-# AWS::S3::Base.establish_connection!(s3_config.slice(:access_key_id, :secret_access_key, :server, :port, :use_ssl, :persistent, :proxy))
-# 
-# 
-# path = File.join(clazz.attachment_options[:path_prefix], o.id, o.filename)
-# 
-# AWS::S3::S3Object.value '', bucket_name
