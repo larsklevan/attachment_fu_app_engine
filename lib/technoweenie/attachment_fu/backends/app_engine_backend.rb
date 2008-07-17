@@ -6,12 +6,8 @@ module Technoweenie # :nodoc:
       module AppEngineBackend
         mattr_accessor :base_url, :storage_prefix
         @@base_url = "http://attachment-fu-gae.appspot.com"
-        @@storage_prefix = ""
-        
-        def self.storage_base_url
-          base_url + (storage_prefix.blank? ? '' : '/' + storage_prefix)
-        end
-        
+        @@storage_prefix = nil
+
         def self.included(base) #:nodoc:
           
         end
@@ -23,7 +19,7 @@ module Technoweenie # :nodoc:
           else
             ''
           end
-          "#{AppEngineBackend.storage_base_url}/#{full_filename}#{query}"
+          "#{AppEngineBackend.base_url}/#{full_filename}#{query}"
         end
 
         def create_temp_file
@@ -45,7 +41,7 @@ module Technoweenie # :nodoc:
         # The pseudo hierarchy containing the file relative to the bucket name
         # Example: <tt>:table_name/:id</tt>
         def base_path
-          ['attachments', attachment_options[:path_prefix].gsub('public/', ''), id.to_s].compact.join('/')
+          ['attachments', storage_prefix, attachment_options[:path_prefix].gsub('public/', ''), id.to_s].compact.join('/')
         end
 
         # The full path to the file relative to the bucket name
@@ -64,7 +60,7 @@ module Technoweenie # :nodoc:
           end
           
           def with_app_engine_connection
-            uri = URI.parse(AppEngineBackend.storage_base_url)
+            uri = URI.parse(AppEngineBackend.base_url)
             Net::HTTP.new(uri.host, uri.port).start do |http|
               yield http
             end
@@ -83,7 +79,7 @@ module Technoweenie # :nodoc:
                      "Content-Type: #{mime_type}\r\n\r\n" +
                      "#{content}\r\n"
 
-              chunks << "Content-Disposition: form-data; name=\"path\"\r\n\r\n#{AppEngineBackend.storage_base_url + full_filename}\r\n"
+              chunks << "Content-Disposition: form-data; name=\"path\"\r\n\r\n#{full_filename}\r\n"
 
               boundary = "349832898984244898448024464570528145"
               post_body = ""

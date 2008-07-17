@@ -1,5 +1,6 @@
 import os
 import cgi
+import logging
 from StringIO import StringIO
 import struct
 
@@ -194,7 +195,9 @@ class AttachmentPage(webapp.RequestHandler):
 
     attachment.update_uploaded_data(uploaded_data.value, uploaded_data.type)
     attachment.put()
-
+    
+    
+    logging.debug('Added attachment with path: ' + attachment.path + ' id: ' + str(attachment.key()))
     self.redirect('/attachments/' + str(attachment.key()))
 
 
@@ -203,6 +206,8 @@ class RedirectPage(webapp.RequestHandler):
     self.redirect('/attachments/new')
 
 def main():
+  logging.getLogger().setLevel(logging.DEBUG)
+
   application = webapp.WSGIApplication(
     [('/attachments/new', UploadAttachmentPage),
       ('/attachments.*', AttachmentPage),
