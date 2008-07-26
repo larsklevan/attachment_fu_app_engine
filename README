@@ -25,6 +25,14 @@ you can also use:
 Image.find(1).public_filename('40x40!')
 
 
+Installation
+============
+
+gem install larsklevan-attachment_fu_app_engine -s http://gems.github.com 
+OR
+script/plugin install git://github.com/larsklevan/attachment_fu_app_engine.git
+
+
 Migration
 =========
 
@@ -44,6 +52,7 @@ Technoweenie::AttachmentFu::Backends::AppEngineBackend.base_url = "http://attach
 Limitations
 ===========
 
+* Tested with Rails 2.1 only
 * Google App Engine is in early release, so if you go past your daily storage/bandwidth/CPU limit you are out of luck.
 * Google App Engine does not support HTTPS.
 * Google App Engine currently has a limit of 1MB per reocrd
