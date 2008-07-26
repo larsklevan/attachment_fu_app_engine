@@ -5,7 +5,8 @@ task :migrate_s3_to_app_engine => :environment do
   require 'open-uri'
   require 'multipart_post'
 
-  clazz = Image
+  raise 'You should specify the class to migrate with ATTACHMENT_CLASS=Image'
+  clazz = ENV['ATTACHMENT_CLASS'].constantize
 
   raise 'You should set the :storage option from your class to :s3 when you run this migration' unless clazz.attachment_options[:storage].to_s == 's3'
 
