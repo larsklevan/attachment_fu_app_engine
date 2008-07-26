@@ -18,11 +18,36 @@ AttachmentFuAppEngine attempts to reproduce the resize format from ImageMagick.
 * "100x100!" - scale the image to be exactly 100x100 by scaling proportionately and cropping off the edges.  Will not distort the image but may hide part of it.
 * "100x100>" - scale the image to be at most 100x100 - smaller images will not be enlarged.
 
+In addition to the standard thumbnail specification:
+Image.find(1).public_filename(:small_square)
+
+you can also use:
+Image.find(1).public_filename('40x40!')
+
+
+Migration
+=========
+
+You can use the provided rake task to move data from S3 to the App Engine.  Just run:
+rake ATTACHMENT_CLASS=Image migrate_s3_to_app_engine
+
+
+Configuration
+=============
+
+You can use your own instance of the App Engine code to store images so you have your own quotas.  Use
+the provided app engine code and configure the URL as follows:
+
+Technoweenie::AttachmentFu::Backends::AppEngineBackend.base_url = "http://attachment-fu-gae.appspot.com"
+
+
 Limitations
 ===========
 
 * Google App Engine is in early release, so if you go past your daily storage/bandwidth/CPU limit you are out of luck.
 * Google App Engine does not support HTTPS.
-* Google App Engine currently has a limit of 1MB per reocrd - http://googleappengine.blogspot.com/2008/04/were-up-and-running.html
+* Google App Engine currently has a limit of 1MB per reocrd
+
+For more information about the status of the App Engine see http://googleappengine.blogspot.com/2008/04/were-up-and-running.html
 
 Copyright (c) 2008 Lars Klevan, released under the MIT license
