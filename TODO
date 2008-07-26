@@ -1,3 +1,0 @@
-* rake task for migrating from S3
-
-* add a unique app prefix to avoid collisions
