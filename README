@@ -28,8 +28,6 @@ Image.find(1).public_filename('40x40!')
 Installation
 ============
 
-gem install larsklevan-attachment_fu_app_engine -s http://gems.github.com 
-OR
 script/plugin install git://github.com/larsklevan/attachment_fu_app_engine.git
 
 
