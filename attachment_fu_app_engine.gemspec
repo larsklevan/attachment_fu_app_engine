@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name     = "attachment_fu_app_engine"
-  s.version  = "0.1.0"
-  s.date     = "2008-07-26"
+  s.version  = "0.2.0"
+  s.date     = "2008-08-02"
   s.summary  = "Extension for AttachmentFu which uses the Google App Engine for storage"
   s.email    = "tastybyte@gmail.com"
   s.homepage = "http://github.com/larsklevan/attachment_fu_app_engine"
