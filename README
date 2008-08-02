@@ -1,7 +1,7 @@
 AttachmentFuAppEngine
 =====================
 
-Extension for AttachmentFu (http://github.com/technoweenie/attachment_fu) which uses the Google App Engine for storage and image resizing.  Removes the need to install ImageMagick and allows you to add or change thumbnail sizes without migrating previous data.
+Extension for AttachmentFu (http://github.com/technoweenie/attachment_fu) which uses the Google App Engine for storage and image resizing.  Allows you to add or change thumbnail sizes without migrating previous data and removes the need to install ImageMagick.
 
 The Google App Engine backend code is included so you can run it in your own App Engine instance.
 
